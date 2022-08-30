@@ -1,8 +1,11 @@
 package com.example.project_ogini.controller;
 
+import com.example.project_ogini.model.dto.OrderDTO;
+import com.example.project_ogini.model.dto.OrderDetailDto;
 import com.example.project_ogini.model.entities.Order;
 import com.example.project_ogini.model.entities.Product;
 import com.example.project_ogini.model.entities.User;
+import com.example.project_ogini.model.repository.OrderDetailRepository;
 import com.example.project_ogini.model.repository.OrderRepository;
 import com.example.project_ogini.util.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 
@@ -26,6 +30,9 @@ public class OrderController {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
     @Autowired
     private JWTUtil jwtUtil;
 
@@ -43,25 +50,20 @@ public class OrderController {
 
     @CrossOrigin(origins = "*", allowedHeaders = "*", methods = RequestMethod.GET)
     @GetMapping("/find")
-    public Optional<Order> getOne(@RequestHeader (name="Authorization") String token,@RequestParam String orderStatus){
+    public List<OrderDTO> findByUserIdAndOrderStatus(@RequestHeader (name="Authorization") String token,@RequestParam String orderStatus){
         Integer userId = jwtUtil.getUserByIdfromJWT(token.replace("Bearer ",""));
-        return orderRepository.findOrder(userId, orderStatus);
+        List<OrderDTO> orderDTOs = orderRepository.findByUserIdAndOrderStatus(userId, orderStatus);
+        orderDTOs.stream().map(orderDTO ->  {
+            List<OrderDetailDto> orderDetails = orderDetailRepository.findByOrderId(orderDTO.getId());
+            orderDTO.setOrderDetails(orderDetails);
+            return orderDTO;
+        }).collect(Collectors.toList());
+        return orderDTOs;
     }
 
     @CrossOrigin(origins = "*", allowedHeaders = "*", methods = RequestMethod.POST)
     @PostMapping()
     public Order insertOrder(@RequestBody Order order) {
-//        SimpleDateFormat format = new SimpleDateFormat("yyy-MM-dd");
-//        Date date= new Date(System.currentTimeMillis());
-//
-//        Order orderNew = new Order();
-//        try{
-//            orderNew.setOrderCreatedAt(format.format(date));
-//            orderRepository.save(orderNew);
-//            return "Register successfully";
-//        } catch (Exception e){
-//            return "Somethings wrong!";
-//        }
         return orderRepository.save(order);
     }
 

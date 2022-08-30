@@ -3,7 +3,7 @@ package com.example.project_ogini.controller;
 
 import com.example.project_ogini.model.entities.Order;
 import com.example.project_ogini.model.entities.OrderDetail;
-import com.example.project_ogini.model.entities.OrderDetailDto;
+import com.example.project_ogini.model.dto.OrderDetailDto;
 import com.example.project_ogini.model.entities.Product;
 import com.example.project_ogini.model.repository.OrderDetailRepository;
 import com.example.project_ogini.model.repository.OrderRepository;
@@ -79,7 +79,7 @@ public class OrderDetailController {
     @GetMapping("/{orderId}")
     public List<OrderDetailDto> getOrderDetail(@PathVariable Integer orderId) {
         System.out.println("orderId: "+ orderId);
-        return orderDetailRepository.testFind(orderId);
+        return orderDetailRepository.findByOrderId(orderId);
     }
 
 }
